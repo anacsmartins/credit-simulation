@@ -97,3 +97,120 @@ docker-compose up
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 ```
+
+## Processamento em Alta Volumetria com worker_threads
+O endpoint de simulações em massa (/loan/bulk-simulate) utiliza o módulo worker_threads do Node.js para dividir as tarefas de simulação em várias threads, otimizando a performance.
+
+Arquivo: src/infrastructure/workers/simulateWorker.ts
+Este arquivo contém a lógica que cada thread executa.
+
+```typescript
+
+  import { workerData, parentPort } from 'worker_threads';
+  import { SimulateLoan } from '../../domain/use-cases/SimulateLoan';
+  
+  if (!workerData || !parentPort) {
+    throw new Error('Worker must be initialized with data and port.');
+  }
+  
+  const simulateLoan = new SimulateLoan();
+  const results = workerData.map((simulation: any) => simulateLoan.execute(simulation));
+  
+  parentPort.postMessage(results);
+```
+Controle no Endpoint:
+
+```typescript
+
+  import { Worker } from 'worker_threads';
+  
+  export async function bulkSimulate(req: Request, res: Response) {
+    const simulations = req.body;
+  
+    const worker = new Worker('./src/infrastructure/workers/simulateWorker.ts', {
+      workerData: simulations,
+    });
+  
+    worker.on('message', (results) => {
+      res.status(200).json(results);
+    });
+  
+    worker.on('error', (error) => {
+      res.status(500).json({ error: error.message });
+    });
+  }
+```
+## Documentação dos Endpoints
+A documentação foi feita utilizando API Blueprint e está no diretório docs/api-blueprint.apib.
+
+Exemplo de visualização de endpoints:
+
+/loan/simulate: Simulação de empréstimo individual.
+/loan/bulk-simulate: Processamento de múltiplas simulações.
+
+Para gerar uma visualização legível, utilize Aglio:
+
+```bash
+aglio -i docs/api-blueprint.apib -o docs/api.html
+```
+
+## Integração Kafka (Abstraída)
+O código prevê integração futura com Kafka para filas de simulações. Mensagens podem ser enviadas para um tópico e processadas por workers.
+Exemplo de integração Kafka:
+
+```typescript
+
+  import { Kafka } from 'kafkajs';
+  
+  const kafka = new Kafka({ clientId: 'credit-simulation', brokers: ['kafka:9092'] });
+  
+  const producer = kafka.producer();
+  await producer.connect();
+  
+  await producer.send({
+    topic: 'simulation-requests',
+    messages: [{ value: JSON.stringify(simulationData) }],
+  });
+```
+## Testes
+### Testes de Unidade
+Testam a lógica de cálculo de empréstimos:
+
+```bash
+npm run test:unit
+```
+### Testes de Integração
+Verificam os endpoints e a interação entre camadas:
+
+```bash
+
+npm run test:integration
+```
+### Testes de Performance
+Simula alta volumetria usando Artillery:
+
+```yaml
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 200
+scenarios:
+  - flow:
+      - post:
+          url: "/loan/bulk-simulate"
+          json:
+            - loanAmount: 10000
+              birthDate: "1980-01-01"
+              termMonths: 24
+```
+Execute:
+
+```bash
+
+artillery run tests/performance.yaml
+```
+Com esta estrutura, o microserviço está preparado para processamento paralelo, documentação clara e extensibilidade com mensageria.
+
+
