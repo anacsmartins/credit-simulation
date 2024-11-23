@@ -37,7 +37,8 @@ credit-simulation/
 ├── tsconfig.json                                        # Configuração do TypeScript
 └── package.json                                         # Dependências e scripts
 ```
-</pre>
+> [!NOTE]
+> Com esta estrutura, o microserviço está preparado para processamento paralelo, documentação clara e extensibilidade com mensageria.
 
 ## Tecnologias e Decisões de Arquitetura
 - **Arquitetura Hexagonal:**
@@ -211,6 +212,42 @@ Execute:
 
 artillery run tests/performance.yaml
 ```
-Com esta estrutura, o microserviço está preparado para processamento paralelo, documentação clara e extensibilidade com mensageria.
 
+> [!IMPORTANT]
+> Abaixo descrevo o roteiro usado para implementação do projeto referente ao teste prático de engenharia backend que foi proposto.
+           
+#### Simulador de Crédito
+- [x] Código submetido em um repositório Git público
+- [x] Incluso um arquivo README.md com instruções sobre como configurar e rodar o projeto.
+#### Setup do Projeto
+- [x] Utilização da linguagem de programação backend: typeScript
+- [x] Framework : express
 
+- [x] Crie endpoints para simular um empréstimo
+- [x] O resultado da simulação deve incluir: valor total a ser pago, ○ Valor das parcelas mensais, ○ Total de juros pagos.
+- [x] Cálculos de Simulação
+- [x] Utilize a fórmula de cálculo de parcelas fixas:
+Onde: ○ PMT = Pagamento mensal, ○ PV = Valor presente (empréstimo), ○ r = Taxa de juros mensal (taxa anual / 12), n = Número total de pagamentos (meses)
+#### Testes Automatizados
+- [x] Escreva testes unitários e de integração para os principais componentes da aplicação.
+- [x] Inclua testes de desempenho para garantir que a aplicação lide bem com alta volumetria de cálculos.
+- [x] Utilização ferramentas de teste: Jest
+#### Documentação
+- [x] Inclua no README.md: Instruções de setup,  exemplos de requisições para os endpoints, explicação sobre a estrutura do projeto e decisões de arquitetura.
+#### Boas Práticas e Qualidade de Código
+- [x] Siga boas práticas de codificação e arquitetura: Hexagonal, codigo fortemente tipado
+- [x] Utilize um linter para manter a consistência do código
+- [x] Inclua comentários e documentação no código quando necessário
+#### Alta Volumetria
+- [x] Implemente um endpoint que aceite múltiplas simulações de crédito em uma única
+requisição (ex: 10.000 simulações).
+- [x] Considere utilizar técnicas de paralelismo e/ou processamento assíncrono para
+melhorar a performance.
+- [x] Abstraia no código a utilização de serviços de mensageria (como SQS, Kafka,
+RabbitMQ), sem a necessidade de implementação completa. Descreva como seriam
+utilizados em um cenário real.
+#### Documentação: A documentação dos endpoints da API utilizam a ferramenta API Blueprint
+- [x] Implementar notificação por email com os resultados da simulação.
+- [x] Adicionar suporte para diferentes cenários de taxa de juros (fixa e variável).
+- [x] Criar um Dockerfile e docker-compose para facilitar o setup da aplicação.
+- [x] Adicionado suporte para diferentes moedas e conversão de taxas.
