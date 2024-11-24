@@ -2,7 +2,7 @@ import express from "express";
 import { LoanSimulationController } from "../application/controllers/LoanController";
 
 export class Server {
-  private app = express();
+  public app = express();
   private loanSimulationController = new LoanSimulationController();
 
   constructor() {

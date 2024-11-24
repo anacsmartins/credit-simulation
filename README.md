@@ -17,7 +17,7 @@ credit-simulation/
 │   │       └── loanRoutes.ts
 │   ├── infrastructure/                                  # Configurações, servidores e conectores
 │   │   ├── config/                                      # Configurações de ambiente
-│   │   │   └── dotenv.ts
+│   │   │   
 │   │   ├── workers/                                     # Threads para processamento paralelo
 │   │   │   └── simulateWorker.ts
 │   │   ├── logger/                                      # Configuração de logs
@@ -29,7 +29,8 @@ credit-simulation/
 │   ├── deployment.yaml                                  # Configuração de deployment
 │   └── service.yaml                                     # Configuração de serviço
 ├── docs/                                                # Documentação API
-│   └── api-blueprint.apib                               # Especificação em API Blueprint
+|   ├── api.html
+│   └── api.apib                                         # Especificação em API Blueprint
 ├── Dockerfile                                           # Configuração do Docker
 ├── docker-compose.yml                                   # Arquivo Compose para ambiente local
 ├── tsconfig.json                                        # Configuração do TypeScript
