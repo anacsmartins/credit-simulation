@@ -10,8 +10,6 @@ credit-simulation/
 │   ├── domain/                                          # Regras de negócio
 │   │   ├── entities/                                    # Entidades principais
 │   │   │   └── LoanSimulation.ts
-│   │   └── use-cases/                                   # Casos de uso
-│   │       └── SimulateLoan.ts
 │   ├── application/                                     # Interface com o mundo externo
 │   │   ├── controllers/                                 # Controladores de API
 │   │   │   └── LoanController.ts
