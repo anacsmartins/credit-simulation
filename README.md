@@ -152,8 +152,10 @@ Exemplo de visualização de endpoints:
 Para gerar uma visualização legível, utilize Aglio:
 
 ```bash
-aglio -i docs/api-blueprint.apib -o docs/api.html
+aglio -i src/docs/api.apib - theme-template triple -s
 ```
+
+Acesse http://127.0.0.1:3000/
 
 ## Integração Kafka (Abstraída)
 O código prevê integração futura com Kafka para filas de simulações. Mensagens podem ser enviadas para um tópico e processadas por workers.

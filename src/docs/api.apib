@@ -1,0 +1,65 @@
+FORMAT: 2A
+HOST: http://api.credit.com.br
+
+# API Simulation Credit
+
+API para realizar simulações de crédito, permitindo calcular valores totais, parcelas mensais e juros.
+
+## Group Empréstimo
+
+### Loans [/simulate-loan]
+
+#### Simular Empréstimo [POST]
+
++ Simula um empréstimo com base nos dados fornecidos e retorna os detalhes da simulação.
+
++ Request (application/json)
+    + Headers
+        Accept: application/json
+
+    + Body
+        {
+          "loanAmount": 25000.01,
+          "birthDate": "2000-01-01",
+          "repaymentTermMonths": 12,
+          "interestType": "variable"
+        }
+
+    + Attributes (object)
+        + loanAmount: 25000.01 (number, required) - Valor do empréstimo.
+        + birthDate: `2000-01-01` (string, required) - Data de nascimento no formato ISO 8601.
+        + repaymentTermMonths: 12 (number, required) - Prazo de pagamento em meses.
+        + interestType: variable (enum[string], optional, default: variable) - Tipo de taxa de juros.
+            + Members
+                + variable - Taxa variável.
+                + fixed - Taxa fixa.
+
++ Response 200 (application/json)
+    + Headers
+
+    + Body
+
+            {
+                "totalAmount": 25819.93,
+                "monthlyInstallment": 2151.66,
+                "totalInterest": 819.93
+            }
+
+    + Attributes (object)
+        + totalAmount: 25819.93 (number) - Valor total a ser pago.
+        + monthlyInstallment: 2151.66 (number) - Valor das parcelas mensais.
+        + totalInterest: 819.93 (number) - Total de juros.
+
++ Response 400 (application/json)
+    + Headers
+
+    + Body
+
+            {
+                "status_code": 400,
+                "error": "Missing required fields"
+            }
+
+    + Attributes (object)
+        + status_code: 400 (number) - Código de status da requisição.
+        + error: `Missing required fields` (string) - Mensagem de erro detalhada.

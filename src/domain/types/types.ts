@@ -1,0 +1,1 @@
+export type Interest = "fixed" | "variable";
