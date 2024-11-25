@@ -13,6 +13,9 @@ credit-simulation/
 │   ├── application/                                     # Interface com o mundo externo
 │   │   ├── controllers/                                 # Controladores de API
 │   │   │   └── LoanController.ts
+|   |   ├── middlewares
+|   |   │   └── validation/
+│   │   |       └── loanSimulationValidation.ts
 │   │   └── routes/                                      # Rotas HTTP
 │   │       └── loanRoutes.ts
 │   ├── infrastructure/                                  # Configurações, servidores e conectores
