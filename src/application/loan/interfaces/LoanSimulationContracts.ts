@@ -7,6 +7,7 @@ export interface LoanSimulationRequest {
     repaymentTermMonths: string;
     interestType?: Interest | undefined;
     currency?: string | undefined;
+    id?: number;
 }
 
 export interface LoanSimulationResponse {

@@ -5,19 +5,16 @@ import { Interest } from "../../domain/types/types";
 
 
 // Mock do constructor e da função `validate` da entidade LoanSimulationEntity
-jest.mock('../../domain/entities/LoanSimulationEntity', () => {
-  return {
-    LoanSimulationEntity: jest.fn().mockImplementation(() => {
-      return {
-        validate: jest.fn().mockReturnValue(true),
-        loanAmount: 1000,
-        birthDate: new Date('1990-01-01'),
-        termMonths: 12,
-        interestType: 'fixed',
-      };
-    }),
-  };
-});
+jest.mock('../../domain/entities/LoanSimulationEntity', () => ({
+  LoanSimulationEntity: jest.fn().mockImplementation(() => ({
+    validate: jest.fn().mockReturnValue(true),
+    loanAmount: 1000,
+    birthDate: new Date('1990-01-01'),
+    termMonths: 12,
+    interestType: 'fixed',
+  })),
+}));
+
 
 describe('LoanSimulationService', () => {
   let loanSimulationService: LoanSimulationService;

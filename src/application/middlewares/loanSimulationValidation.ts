@@ -3,8 +3,8 @@ import { handleValidationErrors } from "./handlerValidationErrors";
 
 // Validação dos dados de entrada
 const validateLoanAmount: ValidationChain = body("loanAmount")
-  .isFloat({ min: 1000, max: 100000000 })
-  .withMessage("Loan amount must be between $1,000 and $100,000,000.");
+  .isFloat({ min: 100, max: 1000000 })
+  .withMessage("Loan amount must be between 100 and 1000000.");
 
 const validateBirthDate: ValidationChain = body("birthDate")
   .isISO8601()

@@ -17,7 +17,7 @@ router.post(
   
   router.post(
     "/simulate-loans",
-    [...loanSimulationValidation, handleValidationErrors],
+    [...loanSimulationValidation],
     (req: any, res: any) => loanSimulationController.simulateBatch(req, res)
   );
   

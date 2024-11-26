@@ -49,13 +49,13 @@ describe('LoanSimulationEntity', () => {
 
     it('should throw an error if there are validation failures', () => {
       const entity = new LoanSimulationEntity({
-        loanAmount: 500,
+        loanAmount: 50,
         birthDate: new Date('1990-01-01'),
         termMonths: 24,
         currency: 'BRL',
       });
 
-      expect(() => entity.validate()).toThrow('Loan amount must be between $1,000 and $100,000.');
+      expect(() => entity.validate()).toThrow('Loan amount must be between 100 and 1000000.');
     });
   });
 
@@ -80,8 +80,6 @@ describe('LoanSimulationEntity', () => {
         termMonths: 72, // Invalid, should be between 12 and 60
         currency: 'BRL',
       });
-
-      const errors = validationResult(entity);
       expect(() => entity.validate()).toThrow('Term must be between 12 and 60 months.');
 
     });
