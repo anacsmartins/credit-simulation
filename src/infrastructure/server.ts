@@ -19,9 +19,13 @@ export class Server {
   }
 
   private routes(): void {
-    this.app.use("/", routes);
-    this.app.use(notFoundHandler); // Middleware modular para rotas 404
-    this.app.use(globalErrorHandler); // Captura erros globais
+    this.app.use("/", routes);  // Suas rotas são registradas aqui
+
+    // Middleware para rotas desconhecidas
+    this.app.use(notFoundHandler);  // Captura as requisições para rotas não definidas
+
+    // Middleware global de erro, se necessário para erros internos
+    this.app.use(globalErrorHandler); 
   }
 
   public start(port: number): void {

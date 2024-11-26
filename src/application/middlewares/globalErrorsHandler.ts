@@ -11,4 +11,5 @@ export const globalErrorHandler = (
 ): void => {
   console.error("Error caught by global handler:", err);
   res.status(500).json({ error: err.message || "Internal Server Error" });
+  return;
 };

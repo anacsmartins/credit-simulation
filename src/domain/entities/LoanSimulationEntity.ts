@@ -1,4 +1,4 @@
-import { check, validationResult } from 'express-validator';
+import { check } from 'express-validator';
 import { Interest } from '../types/types';
 
 export class LoanSimulationEntity {
@@ -8,8 +8,19 @@ export class LoanSimulationEntity {
   interestType?: Interest;
   currency?: string;
 
-  constructor({ loanAmount, birthDate, termMonths, interestType, currency  }: 
-    { loanAmount: number; birthDate: Date; termMonths: number; interestType?: Interest, currency?: string; }) {
+  constructor({
+    loanAmount,
+    birthDate,
+    termMonths,
+    interestType,
+    currency,
+  }: {
+    loanAmount: number;
+    birthDate: Date;
+    termMonths: number;
+    interestType?: Interest;
+    currency?: string;
+  }) {
     this.loanAmount = loanAmount;
     this.birthDate = birthDate;
     this.termMonths = termMonths;
@@ -17,21 +28,35 @@ export class LoanSimulationEntity {
     this.currency = currency;
   }
 
-  // Método para validar se os dados da simulação de empréstimo estão corretos
+  // Método para validar os dados de simulação de empréstimo
   public validate(): boolean {
+    // Validando a moeda
     const supportedCurrencies = ["BRL", "USD", "EUR", "GBP"];
     if (!supportedCurrencies.includes(this.currency ?? "BRL")) {
       throw new Error(
         `Unsupported currency: ${this.currency}. Supported currencies are ${supportedCurrencies.join(", ")}.`
       );
     }
-    const errors = validationResult(this);
-    if (!errors.isEmpty()) {
-      throw new Error(`Validation errors: ${errors.array().map(err => err.msg).join(', ')}`);
+
+    // Validações customizadas
+    if (this.loanAmount < 1000 || this.loanAmount > 100000) {
+      throw new Error('Loan amount must be between $1,000 and $100,000.');
     }
+
+    if (this.termMonths < 12 || this.termMonths > 60) {
+      throw new Error('Term must be between 12 and 60 months.');
+    }
+
+    if (isNaN(this.birthDate.getTime())) {
+      throw new Error('Birth date must be a valid date.');
+    }
+
+    if (this.interestType && !['fixed', 'variable'].includes(this.interestType)) {
+      throw new Error('Interest type must be either "fixed" or "variable".');
+    }
+
     return true;
   }
-
 
   // Validações customizadas
   static get validations() {

@@ -1,13 +1,8 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
+
 /**
- * Middleware global para capturar e processar erros.
+ * Middleware para capturar rotas não encontradas (404).
  */
-export const notFoundHandler = (
-    err: Error,
-    _req: Request,
-    res: Response,
-    _next: NextFunction ): void => {
-    console.error("Error caught by global handler:", err);
-    res.status(404).json({ error: "Route not found" });
+export const notFoundHandler = (_req: Request, res: Response, _next: NextFunction): void => {
+  res.status(404).json({ error: "Route not found" });
 };
-  

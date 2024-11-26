@@ -9,8 +9,9 @@
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "test": "jest",
+    "test": "jest --watchAll",
     "test:watch": "jest --watch",
+    "test:run": "jest",
     "clean": "rm -rf dist"
   },
   "keywords": [],

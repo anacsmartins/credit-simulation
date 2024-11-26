@@ -6,11 +6,12 @@ const MONTHS = 12;
 
 // Exemplo de taxas de câmbio fictícias (ideal seria armazenar essa info no banco de dados)
 const exchangeRates: Record<string, number> = {
-  USD: 1,
-  EUR: 0.9,
-  GBP: 0.75,
-  BRL: 5.3, // 1 USD = 5.3 BRL
+  USD: 5.3,  // 1 USD = 5.3 BRL
+  EUR: 5.88, // 1 EUR = 5.88 BRL (exemplo, pode ser ajustado)
+  GBP: 6.67, // 1 GBP = 6.67 BRL (exemplo, pode ser ajustado)
+  BRL: 1.0,  // 1 BRL = 1 BRL
 };
+
 
 export class LoanSimulationService {
   private static instance: LoanSimulationService;
@@ -24,10 +25,10 @@ export class LoanSimulationService {
     return LoanSimulationService.instance;
   }
 
-  // Função para converter o valor do empréstimo
+  // Função para converter o valor do empréstimo para BRL (moeda padrão)
   private convertCurrency(amount: number, currency: string = 'BRL'): number {
-    const rate = exchangeRates[currency] || exchangeRates['BRL']; // Default para BRL se a moeda não for reconhecida
-    return amount / rate; // Convertendo para BRL, que é a moeda padrão
+    const rate = exchangeRates[currency];
+    return amount * rate; // Convertendo para BRL
   }
 
   // Método para simular o empréstimo
@@ -51,12 +52,14 @@ export class LoanSimulationService {
       const totalPaid = PMT * n;
       const totalInterest = totalPaid - PV;
 
-      // Convertendo os resultados para a moeda original (BRL)
-      return {
-        monthlyInstallment: parseFloat((PMT * exchangeRates[currency]).toFixed(2)),
-        totalAmount: parseFloat((totalPaid * exchangeRates[currency]).toFixed(2)),
-        totalInterest: parseFloat((totalInterest * exchangeRates[currency]).toFixed(2)),
+      // Convertendo os resultados para a moeda original (caso não seja BRL)
+      const result: LoanSimulationResult = {
+        monthlyInstallment: parseFloat((PMT / exchangeRates[currency]).toFixed(2)),  // Convertendo para a moeda original
+        totalAmount: parseFloat((totalPaid / exchangeRates[currency]).toFixed(2)),
+        totalInterest: parseFloat((totalInterest / exchangeRates[currency]).toFixed(2)),
       };
+
+      return result;
     } catch (error) {
       console.error("Error during loan simulation:", error);
       throw new Error("Failed to simulate loan. Please check the input parameters.");
