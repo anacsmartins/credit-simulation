@@ -11,18 +11,27 @@ credit-simulation/
 │   │   ├── entities/                                    # Entidades principais
 │   │   │   └── LoanSimulation.ts
 │   ├── application/                                     # Interface com o mundo externo
-│   │   ├── controllers/                                 # Controladores de API
-│   │   │   └── LoanController.ts
+|   |   │   └── loan/
+|   |   │       └── controllers/                         # Controladores de API
+|   |   │           └── LoanController.ts
+│   │   │       └── listeners/                           # Listeners Kafka
+│   │   │           └── LoanSimulationKafkaListener.ts   # Consumidor de mensagens
+│   │   │       └── interface/                           # Listeners Kafka
+│   │   │           └── LoanSimulationContracts.ts
 |   |   ├── middlewares
-|   |   │   └── validation/
-│   │   |       └── loanSimulationValidation.ts
+|   |   │   └── handlerValidationErrors.ts
+│   │   |   └── globalErrorsHandler.ts
+│   │   |   └── loanSimulationValidation.ts
+│   │   |   └── notFoundHandler.ts
 │   │   └── routes/                                      # Rotas HTTP
 │   │       └── loanRoutes.ts
 │   ├── infrastructure/                                  # Configurações, servidores e conectores
 │   │   ├── config/                                      # Configurações de ambiente
-│   │   │   
+│   │   │   └── routers.ts                               # Configuração de rotas
+│   │   ├── kafka/                                       # Serviços Kafka (produtores e consumidores)
+│   │   │   └── KafkaProvider.ts                         # Cliente Kafka
 │   │   ├── workers/                                     # Threads para processamento paralelo
-│   │   │   └── simulateWorker.ts
+│   │   │   └── loanSimulateWorker.js
 │   │   ├── logger/                                      # Configuração de logs
 │   │   │   └── logger.ts
 │   │   └── server.ts                                    # Configuração do servidor

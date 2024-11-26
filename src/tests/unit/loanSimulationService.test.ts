@@ -1,4 +1,4 @@
-import { LoanSimulation } from "../../domain/entities/LoanSimulation";
+import { LoanSimulationEntity } from "../../domain/entities/LoanSimulationEntity";
 import { LoanSimulationResult } from "../../domain/interfaces/LoanSimulationResult";
 import { LoanSimulationService } from "../../domain/services/LoanSimulationService";
 import { Interest } from "../../domain/types/types";
@@ -11,7 +11,7 @@ describe("LoanSimulationService", () => {
   let loanSimulationService: LoanSimulationService;
 
   beforeEach(() => {
-    loanSimulationService = new LoanSimulationService();
+    loanSimulationService = LoanSimulationService.getInstance();
   });
 
   it("should call LoanSimulation with the correct parameters and return the simulated result", async () => {
@@ -25,7 +25,7 @@ describe("LoanSimulationService", () => {
     const simulateMock = jest.fn().mockResolvedValue(mockLoanSimulationResult);
 
     // Substituindo a implementação do método `simulate` da classe `LoanSimulation` pelo mock
-    (LoanSimulation as jest.Mock).mockImplementation(() => ({
+    (LoanSimulationEntity as unknown as jest.Mock).mockImplementation(() => ({
       simulate: simulateMock,
     }));
 
@@ -38,7 +38,7 @@ describe("LoanSimulationService", () => {
     const result = await loanSimulationService.simulateLoan(loanAmount, birthDate, termMonths, interestType);
 
     // Assert
-    expect(LoanSimulation).toHaveBeenCalledWith({
+    expect(LoanSimulationEntity).toHaveBeenCalledWith({
       loanAmount,
       birthDate,
       termMonths,

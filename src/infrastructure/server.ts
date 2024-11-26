@@ -1,29 +1,30 @@
 import express from "express";
-import { LoanSimulationController } from "../application/controllers/LoanController";
-import { loanSimulationErrorHandler, loanSimulationValidation } from "../application/middlewares/loanSimulationValidation";
+import bodyParser from "body-parser";
+import routes from "../infrastructure/config/routers";
+import { globalErrorHandler } from "../application/middlewares/globalErrorsHandler";
+import { notFoundHandler } from "../application/middlewares/notFoundHandler";
 
 export class Server {
-  public app = express();
-  private loanSimulationController = new LoanSimulationController();
+  public app: express.Application;
 
   constructor() {
-    const bodyParser = require("body-parser");
-    this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({ extended: false }));
-
-    // Rota com middleware de validação
-    this.app.post(
-      "/simulate-loan",
-      [...loanSimulationValidation, loanSimulationErrorHandler],
-      (req: any, res: any) => this.loanSimulationController.simulate(req, res)
-    );
-
-    this.app.use((req, res) => {
-      res.status(404).json({ error: "Not Found" });
-    });
+    this.app = express();
+    this.config();
+    this.routes();
   }
 
-  start(port: number) {
+  private config(): void {
+    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.urlencoded({ extended: false }));
+  }
+
+  private routes(): void {
+    this.app.use("/", routes);
+    this.app.use(notFoundHandler); // Middleware modular para rotas 404
+    this.app.use(globalErrorHandler); // Captura erros globais
+  }
+
+  public start(port: number): void {
     this.app.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });

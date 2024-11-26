@@ -1,12 +1,10 @@
 import { body, ValidationChain } from "express-validator";
-import { handleValidationErrors } from "./handleValidationErrors";
+import { handleValidationErrors } from "./handlerValidationErrors";
 
-// Validação dos dados
+// Validação dos dados de entrada
 const validateLoanAmount: ValidationChain = body("loanAmount")
-  .isNumeric()
-  .withMessage("Loan amount must be a number.")
-  .custom((value: number) => value > 0)
-  .withMessage("Loan amount must be greater than 0.");
+  .isFloat({ min: 1000, max: 100000000 })
+  .withMessage("Loan amount must be between $1,000 and $100,000,000.");
 
 const validateBirthDate: ValidationChain = body("birthDate")
   .isISO8601()
@@ -14,13 +12,18 @@ const validateBirthDate: ValidationChain = body("birthDate")
   .withMessage("Birth date must be a valid ISO8601 date.");
 
 const validateRepaymentTerm: ValidationChain = body("repaymentTermMonths")
-  .isInt({ min: 1 })
-  .withMessage("Repayment term must be an integer greater than 0.");
+  .isInt({ min: 12, max: 60 })
+  .withMessage("Repayment term must be between 12 and 60 months.");
 
 const validateInterestType: ValidationChain = body("interestType")
   .optional()
   .isIn(["fixed", "variable"])
   .withMessage("Interest type must be 'fixed' or 'variable'.");
+
+const validateCurrency: ValidationChain = body("currency")
+  .optional()
+  .isIn(["BRL", "USD", "EUR", "GBP"])
+  .withMessage("Currency must be one of the following: BRL, USD, EUR, GBP.");
 
 // Exportar os middlewares de validação
 export const loanSimulationValidation: ValidationChain[] = [
@@ -28,6 +31,7 @@ export const loanSimulationValidation: ValidationChain[] = [
   validateBirthDate,
   validateRepaymentTerm,
   validateInterestType,
+  validateCurrency,
 ];
 
 // Exportar o middleware de tratamento de erros separadamente

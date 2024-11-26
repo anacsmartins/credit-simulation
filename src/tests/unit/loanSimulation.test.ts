@@ -1,10 +1,10 @@
-import { LoanSimulation } from "../../domain/entities/LoanSimulation";
+import { LoanSimulationEntity } from "../../domain/entities/LoanSimulationEntity";
 
 
 describe('LoanSimulation', () => {
 
   it('should calculate correct interest rate for fixed interest with age under 25', () => {
-    const loanSimulation = new LoanSimulation({
+    const loanSimulation = new LoanSimulationEntity({
       loanAmount: 10000,
       birthDate: new Date(2000, 1, 1),  // Idade de 24 anos
       termMonths: 24,
@@ -18,7 +18,7 @@ describe('LoanSimulation', () => {
   });
 
   it('should calculate correct interest rate for fixed interest with age between 26 and 40', () => {
-    const loanSimulation = new LoanSimulation({
+    const loanSimulation = new LoanSimulationEntity({
       loanAmount: 15000,
       birthDate: new Date(1985, 1, 1),  // Idade de 39 anos
       termMonths: 36,
@@ -32,7 +32,7 @@ describe('LoanSimulation', () => {
   });
 
   it('should calculate correct interest rate for variable interest', () => {
-    const loanSimulation = new LoanSimulation({
+    const loanSimulation = new LoanSimulationEntity({
       loanAmount: 20000,
       birthDate: new Date(1990, 1, 1),  // Idade de 34 anos
       termMonths: 48,
@@ -46,7 +46,7 @@ describe('LoanSimulation', () => {
   });
 
   it('should calculate correct interest rate for age above 60 with variable interest', () => {
-    const loanSimulation = new LoanSimulation({
+    const loanSimulation = new LoanSimulationEntity({
       loanAmount: 25000,
       birthDate: new Date(1950, 1, 1),  // Idade de 74 anos
       termMonths: 60,
@@ -60,7 +60,7 @@ describe('LoanSimulation', () => {
   });
 
   it('should return correct monthly installment and total amount with expected precision', () => {
-    const loanSimulation = new LoanSimulation({
+    const loanSimulation = new LoanSimulationEntity({
       loanAmount: 5000,
       birthDate: new Date(1995, 1, 1),  // Idade de 29 anos
       termMonths: 12,
@@ -74,7 +74,7 @@ describe('LoanSimulation', () => {
 
 
   it('should return the correct monthly installment and total amount with the expected accuracy for those under 24 years of age', () => {
-    const loanSimulation = new LoanSimulation({
+    const loanSimulation = new LoanSimulationEntity({
       loanAmount: 5000,
       birthDate: new Date(2005, 1, 1),  // Idade de 19 anos
       termMonths: 12,
@@ -87,7 +87,7 @@ describe('LoanSimulation', () => {
   });
 
   it('should return the correct monthly installment and the total amount if you are under 40 and over 25 years old', () => {
-    const loanSimulation = new LoanSimulation({
+    const loanSimulation = new LoanSimulationEntity({
       loanAmount: 35000,
       birthDate: new Date(1994, 1, 1),  // Idade de 30 anos
       termMonths: 48,
