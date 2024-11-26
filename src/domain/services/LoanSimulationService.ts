@@ -7,8 +7,8 @@ const MONTHS = 12;
 // Exemplo de taxas de câmbio fictícias (ideal seria armazenar essa info no banco de dados)
 const exchangeRates: Record<string, number> = {
   USD: 5.3,  // 1 USD = 5.3 BRL
-  EUR: 5.88, // 1 EUR = 5.88 BRL (exemplo, pode ser ajustado)
-  GBP: 6.67, // 1 GBP = 6.67 BRL (exemplo, pode ser ajustado)
+  EUR: 5.88, // 1 EUR = 5.88 BRL
+  GBP: 6.67, // 1 GBP = 6.67 BRL
   BRL: 1.0,  // 1 BRL = 1 BRL
 };
 

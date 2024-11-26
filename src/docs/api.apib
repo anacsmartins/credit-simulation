@@ -7,7 +7,7 @@ API para realizar simulações de crédito, permitindo calcular valores totais, 
 
 ## Group Empréstimo
 
-### Loans [/simulate-loan]
+### Simulação de Empréstimo individual [/simulate-loan]
 
 #### Simular Empréstimo [POST]
 
@@ -15,24 +15,25 @@ API para realizar simulações de crédito, permitindo calcular valores totais, 
 
 + Request (application/json)
     + Headers
-        Accept: application/json
+
+            Accept: application/json
 
     + Body
-        {
-          "loanAmount": 25000.01,
-          "birthDate": "2000-01-01",
-          "repaymentTermMonths": 12,
-          "interestType": "variable"
-        }
+
+            {
+                "loanAmount": 25000.01,
+                "birthDate": "2000-01-01",
+                "repaymentTermMonths": 12,
+                "interestType": "variable",
+                "currency": "BRL"
+            }
 
     + Attributes (object)
         + loanAmount: 25000.01 (number, required) - Valor do empréstimo.
         + birthDate: `2000-01-01` (string, required) - Data de nascimento no formato ISO 8601.
         + repaymentTermMonths: 12 (number, required) - Prazo de pagamento em meses.
-        + interestType: variable (enum[string], optional, default: variable) - Tipo de taxa de juros.
-            + Members
-                + variable - Taxa variável.
-                + fixed - Taxa fixa.
+        + currency: `BRL` (string, optional) - Moeda utilizada. Valores permitidos BRL, USD, EUR, GBP.
+        + interestType: variable (string, optional) - Tipo de taxa de juros. Valores permitidos variable, fixed.
 
 + Response 200 (application/json)
     + Headers
@@ -49,6 +50,83 @@ API para realizar simulações de crédito, permitindo calcular valores totais, 
         + totalAmount: 25819.93 (number) - Valor total a ser pago.
         + monthlyInstallment: 2151.66 (number) - Valor das parcelas mensais.
         + totalInterest: 819.93 (number) - Total de juros.
+
++ Response 400 (application/json)
+    + Headers
+
+    + Body
+
+            {
+                "status_code": 400,
+                "error": "Missing required fields"
+            }
+
+    + Attributes (object)
+        + status_code: 400 (number) - Código de status da requisição.
+        + error: `Missing required fields` (string) - Mensagem de erro detalhada.
+
+### Simulação de Empréstimos em lote [/simulate-loans]
+
+#### Simular Empréstimo [POST]
+
++ Simula um empréstimo com base nos dados fornecidos e retorna os detalhes da simulação.
+
++ Request (application/json)
+    + Headers
+
+            Accept: application/json
+
+    + Body
+
+            [
+                {
+                    "loanAmount": 25000.01,
+                    "birthDate": "2000-01-01",
+                    "repaymentTermMonths": 12,
+                    "interestType": "variable",
+                    "currency": "BRL"
+                },
+                {
+                    "loanAmount": 15000.00,
+                    "birthDate": "1980-05-12",
+                    "repaymentTermMonths": 24,
+                    "interestType": "fixed",
+                    "currency": "USD"
+                }
+            ]
+
+    + Attributes (array) - Lista de solicitações de simulação de empréstimo.
+             + (object)
+                + loanAmount: 25000.01 (number, required) - Valor do empréstimo.
+                + birthDate: `2000-01-01` (string, required) - Data de nascimento no formato ISO 8601.
+                + repaymentTermMonths: 12 (number, required) - Prazo de pagamento em meses.
+                + currency: `BRL` (string, optional) - Moeda utilizada. Valores permitidos BRL, USD, EUR, GBP.
+                + interestType: variable (string, optional) - Tipo de taxa de juros. Valores permitidos variable, fixed.
+
++ Response 200 (application/json)
+    + Headers
+
+    + Body
+
+            [
+                {
+                    "totalAmount": 25819.93,
+                    "monthlyInstallment": 2151.66,
+                    "totalInterest": 819.93
+                },
+                {
+                    "totalAmount": 25819.93,
+                    "monthlyInstallment": 2151.66,
+                    "totalInterest": 819.93
+                }
+            ]
+
+    + Attributes (array) - Lista de solicitações de simulação de empréstimo.
+        + (object)
+            + totalAmount: 25819.93 (number) - Valor total a ser pago.
+            + monthlyInstallment: 2151.66 (number) - Valor das parcelas mensais.
+            + totalInterest: 819.93 (number) - Total de juros.
+
 
 + Response 400 (application/json)
     + Headers
