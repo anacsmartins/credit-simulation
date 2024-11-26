@@ -79,29 +79,21 @@ API para realizar simulações de crédito, permitindo calcular valores totais, 
     + Body
 
             [
-                {
-                    "loanAmount": 25000.01,
-                    "birthDate": "2000-01-01",
-                    "repaymentTermMonths": 12,
-                    "interestType": "variable",
-                    "currency": "BRL"
-                },
-                {
-                    "loanAmount": 15000.00,
-                    "birthDate": "1980-05-12",
-                    "repaymentTermMonths": 24,
-                    "interestType": "fixed",
-                    "currency": "USD"
-                }
+                    {
+                        "loanAmount": 25000.01,
+                        "birthDate": "2000-01-01",
+                        "repaymentTermMonths": 12,
+                        "interestType": "variable",
+                        "currency": "BRL"
+                    },
+                    {
+                        "loanAmount": 15000.00,
+                        "birthDate": "1980-05-12",
+                        "repaymentTermMonths": 24,
+                        "interestType": "fixed",
+                        "currency": "USD"
+                    }
             ]
-
-    + Attributes (array) - Lista de solicitações de simulação de empréstimo.
-             + (object)
-                + loanAmount: 25000.01 (number, required) - Valor do empréstimo.
-                + birthDate: `2000-01-01` (string, required) - Data de nascimento no formato ISO 8601.
-                + repaymentTermMonths: 12 (number, required) - Prazo de pagamento em meses.
-                + currency: `BRL` (string, optional) - Moeda utilizada. Valores permitidos BRL, USD, EUR, GBP.
-                + interestType: variable (string, optional) - Tipo de taxa de juros. Valores permitidos variable, fixed.
 
 + Response 200 (application/json)
     + Headers
@@ -120,13 +112,6 @@ API para realizar simulações de crédito, permitindo calcular valores totais, 
                     "totalInterest": 819.93
                 }
             ]
-
-    + Attributes (array) - Lista de solicitações de simulação de empréstimo.
-        + (object)
-            + totalAmount: 25819.93 (number) - Valor total a ser pago.
-            + monthlyInstallment: 2151.66 (number) - Valor das parcelas mensais.
-            + totalInterest: 819.93 (number) - Total de juros.
-
 
 + Response 400 (application/json)
     + Headers
