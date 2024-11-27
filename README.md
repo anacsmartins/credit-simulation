@@ -126,7 +126,7 @@ Refresh web page in browser
 ```
 Após exibição acesse http://127.0.0.1:3000/
 
-![alt text](src/docs/image.png)
+![alt text](./src/docs/image.png)
 
 Exemplo de visualização de endpoints:
 
