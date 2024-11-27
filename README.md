@@ -109,14 +109,6 @@ docker build -t credit-simulation .
 docker-compose up
 ```
 
-#### 6. Executar no Kubernetes:
-- Aplicar os arquivos de configuração:
-
-```bash
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-```
-
 ## Processamento em Alta Volumetria com worker_threads
 O endpoint de simulações em massa (/loan/bulk-simulate) utiliza o módulo worker_threads do Node.js para dividir as tarefas de simulação em várias threads, otimizando a performance.
 
