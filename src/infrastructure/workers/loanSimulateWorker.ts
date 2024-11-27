@@ -1,13 +1,15 @@
 import { parentPort } from "worker_threads";
-import { LoanSimulationService } from "../services/LoanSimulationService";
-import { logger } from "../../infrastructure/utils/logger";
-import { LoanSimulationEntity } from "../entities/LoanSimulationEntity";
-import { LoanSimulationResult } from "../interfaces/LoanSimulationResult";
-import { LoanSimulationResponse } from "../../application/loan/interfaces/LoanSimulationContracts";
 
+import { LoanSimulationResponse } from "../../application/loan/interfaces/LoanSimulationContracts";
+import { LoanSimulationService } from "../../domain/services/LoanSimulationService";
+import { LoanSimulationEntity } from "../../domain/entities/LoanSimulationEntity";
+import { LoanSimulationResult } from "../../domain/interfaces/LoanSimulationResult";
+import { logger } from "../utils/logger";
+import { Container } from 'inversify';
 
 // Serviço de simulação
-const loanSimulationService = LoanSimulationService.getInstance();
+const container = new Container();
+const loanSimulationService = container.get(LoanSimulationService);
 
 // Função para adicionar timeout às promessas
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {

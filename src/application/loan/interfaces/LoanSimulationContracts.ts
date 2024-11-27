@@ -1,5 +1,5 @@
 import { LoanSimulationResult } from "../../../domain/interfaces/LoanSimulationResult";
-import { Interest } from "../../../domain/types/types";
+import { Interest } from "../../../domain/interfaces/types";
 
 export interface LoanSimulationRequest {
     loanAmount: string;
@@ -8,6 +8,7 @@ export interface LoanSimulationRequest {
     interestType?: Interest | undefined;
     currency?: string | undefined;
     id?: number;
+    email?: string;
 }
 
 export interface LoanSimulationResponse {

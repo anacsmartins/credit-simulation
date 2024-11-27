@@ -4,7 +4,9 @@
     "strict": true,
     "module": "CommonJS",
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "experimentalDecorators": true,  // Habilitar suporte a decorators
+    "emitDecoratorMetadata": true     // Emitir metadados necessários para bibliotecas como inversify
   },
   "include": ["src"]
 }

@@ -1,5 +1,5 @@
 import { LoanSimulationService } from "../../domain/services/LoanSimulationService";
-import { LoanSimulationController } from "../../application/loan/controllers/LoanController";
+import { LoanSimulationController } from "../../application/loan/controllers/LoanSimulationController";
 import { Server } from "../../infrastructure/server";
 import request from "supertest";
 
