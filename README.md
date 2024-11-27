@@ -23,8 +23,6 @@ credit-simulation/
 │   │   |   └── globalErrorsHandler.ts
 │   │   |   └── loanSimulationValidation.ts
 │   │   |   └── notFoundHandler.ts
-│   │   └── routes/                                      # Rotas HTTP
-│   │       └── loanRoutes.ts
 │   ├── infrastructure/                                  # Configurações, servidores e conectores
 │   │   ├── config/                                      # Configurações de ambiente
 │   │   │   └── routers.ts                               # Configuração de rotas
@@ -129,6 +127,15 @@ Após exibição acesse http://127.0.0.1:3000/
 ![alt text](https://raw.githubusercontent.com/anacsmartins/credit-simulation/main/src/docs/image.png)
 
 Exemplo de visualização de endpoints:
+
+> [!CAUTION]
+> Para que o projeto seja executado localmente, garanta que a execução do mock referente a documentação tenha sido interronpida. Para isso uso excute ctrl+c no console.
+
+```bash
+Rendering src/docs/api.apib
+Refresh web page in browser
+> cntrl+c
+```
 
 ### Endpoint 1
 ```bash
@@ -248,7 +255,7 @@ Resonse
 ]
 ```
 
-## Processamento em Alta Volumetria com worker_threads
+## Processamento em alta volumetria com worker_threads
 O endpoint de simulações em massa (/loan/bulk-simulate) utiliza o módulo worker_threads do Node.js para dividir as tarefas de simulação em várias threads, otimizando a performance.
 
 Arquivo: src/infrastructure/workers/simulateWorker.ts

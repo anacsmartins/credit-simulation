@@ -1,73 +1,79 @@
+import "reflect-metadata";
 import { LoanSimulationEntity } from "../../domain/entities/LoanSimulationEntity";
 import { LoanSimulationResult } from "../../domain/interfaces/LoanSimulationResult";
-import { Interest } from "../../domain/interfaces/types";
 import { LoanSimulationService } from "../../domain/services/LoanSimulationService";
+import { SendgridProvider } from "../../infrastructure/providers/email/SendgridProvider";
 
+jest.mock("../../infrastructure/providers/email/SendgridProvider"); // Mockando o SendgridProvider
 
-// Mock do constructor e da função `validate` da entidade LoanSimulationEntity
-jest.mock('../../domain/entities/LoanSimulationEntity', () => ({
-  LoanSimulationEntity: jest.fn().mockImplementation(() => ({
-    validate: jest.fn().mockReturnValue(true),
-    loanAmount: 1000,
-    birthDate: new Date('1990-01-01'),
-    termMonths: 12,
-    interestType: 'fixed',
-  })),
-}));
-
-
-describe('LoanSimulationService', () => {
-  let loanSimulationService: LoanSimulationService;
+describe("LoanSimulationService", () => {
+  let service: LoanSimulationService;
+  let sendgridProvider: jest.Mocked<SendgridProvider>;
 
   beforeEach(() => {
-    loanSimulationService = LoanSimulationService.getInstance();
+    sendgridProvider = new SendgridProvider() as jest.Mocked<SendgridProvider>;
+    service = new LoanSimulationService(sendgridProvider);
   });
 
-  it('should simulate a loan in BRL correctly', async () => {
-    const loanAmount = 1000;
-    const birthDate = new Date('1990-01-01');
-    const termMonths = 12;
-    const interestType: Interest = 'fixed';
-
-    const result: LoanSimulationResult = await loanSimulationService.simulateLoan(
-      loanAmount,
-      birthDate,
-      termMonths,
-      interestType,
-      'BRL'
-    );
-
-    expect(result).toHaveProperty('monthlyInstallment');
-    expect(result).toHaveProperty('totalAmount');
-    expect(result).toHaveProperty('totalInterest');
-    expect(result.monthlyInstallment).toBeGreaterThan(0);
-    expect(result.totalAmount).toBeGreaterThan(0);
-    expect(result.totalInterest).toBeGreaterThan(0);
-  });
-
-  it('should throw an error if loan amount is invalid', async () => {
-    const loanAmount = -1000; // Empréstimo com valor negativo (fora do intervalo permitido)
-    const birthDate = new Date('1990-01-01');
-    const termMonths = 12;
-    const interestType: Interest = 'fixed';
-  
-    // Espera-se que o erro lançado tenha a mensagem correspondente ao erro de valor inválido
-    await expect(
-      loanSimulationService.simulateLoan(loanAmount, birthDate, termMonths, interestType)
-    ).rejects
-  });
-  
-
-  it('should calculate interest rate based on age and interest type', () => {
-    const loanSimulationEntity = new LoanSimulationEntity({
-      loanAmount: 1000,
-      birthDate: new Date('1990-01-01'),
-      termMonths: 12,
-      interestType: 'fixed',
+  describe("simulateLoan", () => {
+    it("should calculate loan simulation results correctly in BRL", async () => {
+      const result = await service.simulateLoan(1000, new Date("1990-01-01"), 12, "fixed", "BRL");
+      
+      expect(result.monthlyInstallment).toBeGreaterThan(0);
+      expect(result.totalAmount).toBeGreaterThan(1000);
+      expect(result.totalInterest).toBeGreaterThan(0);
     });
 
-    const interestRate = loanSimulationService['calculateInterestRate'](loanSimulationEntity);
+    it("should convert loan amount to BRL and calculate correctly for USD", async () => {
+      const result = await service.simulateLoan(1000, new Date("1990-01-01"), 12, "fixed", "USD");
 
-    expect(interestRate).toBe(0.03); // Age is 34, so baseRate should be 0.03 for 'fixed' interestType
+      expect(result.monthlyInstallment).toBeDefined();
+      expect(result.totalAmount).toBeDefined();
+      expect(result.totalInterest).toBeDefined();
+    });
+
+    it("should throw an error if loan simulation data is invalid", async () => {
+      jest.spyOn(LoanSimulationEntity.prototype, "validate").mockReturnValue(false);
+
+      await expect(service.simulateLoan(0, new Date("1990-01-01"), 12, "fixed"))
+        .rejects
+        .toThrow("Failed to simulate loan. Please check the input parameters.");
+    });
+  });
+
+  describe("sendEmail", () => {
+    it("should send email with valid simulation results", async () => {
+      const simulationResult: LoanSimulationResult = {
+        monthlyInstallment: 100.0,
+        totalAmount: 1200.0,
+        totalInterest: 200.0,
+      };
+
+      const emailText = `Aqui estão os resultados da sua simulação de empréstimo:\n\n` +
+      `Parcela Mensal: ${simulationResult.monthlyInstallment.toFixed(0)}\n` +
+      `Total a Pagar: ${simulationResult.totalAmount.toFixed(0)}\n` +
+      `Total de Juros: ${simulationResult.totalInterest.toFixed(0)}`;
+
+      const email = "test@example.com";
+      await service.sendEmail(simulationResult, email);
+
+      expect(sendgridProvider.sendEmail).toHaveBeenCalledWith(
+        email,
+        "Resultado da Simulação de Empréstimo",
+        emailText
+      );
+    });
+
+    it("should throw an error for invalid email", async () => {
+      const simulationResult: LoanSimulationResult = {
+        monthlyInstallment: 100.0,
+        totalAmount: 1200.0,
+        totalInterest: 200.0,
+      };
+
+      await expect(service.sendEmail(simulationResult, "invalid-email"))
+        .rejects
+        .toThrow("E-mail inválido.");
+    });
   });
 });

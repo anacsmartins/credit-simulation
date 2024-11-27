@@ -10,6 +10,10 @@ const router = express.Router();
 
 // Obtendo o controlador do contêiner (inversify)
 const loanSimulationController = inversifyContainer.get<LoanSimulationController>(TYPES.LoanSimulationController);
+if (!inversifyContainer.isBound(TYPES.LoanSimulationController)) {
+  console.error('LoanSimulationController não está registrado');
+}
+
 
 // Definindo as rotas
 router.post(

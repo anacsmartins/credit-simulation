@@ -2,7 +2,7 @@ import { Server } from "../../infrastructure/server";
 import supertest from "supertest";
 
 // Mockando o LoanSimulationController
-jest.mock("../../application/loan/controllers/LoanController");
+jest.mock("../../application/loan/controllers/LoanSimulationController");
 
 describe("Server", () => {
   let server: Server;
