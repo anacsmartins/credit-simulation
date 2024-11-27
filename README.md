@@ -129,7 +129,7 @@ Após exibição acesse http://127.0.0.1:3000/
 Exemplo de visualização de endpoints:
 
 > [!CAUTION]
-> Para que o projeto seja executado localmente, garanta que a execução do mock referente a documentação tenha sido interronpida. Para isso uso excute ctrl+c no console.
+> Para que o projeto seja executado localmente, garanta que a execução do mock referente a documentação tenha sido interronpida. Por isso, uso excute ctrl+c no console.
 
 ```bash
 Rendering src/docs/api.apib
