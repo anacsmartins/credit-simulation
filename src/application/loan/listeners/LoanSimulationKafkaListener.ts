@@ -1,7 +1,7 @@
-import { KafkaProvider } from "../../../domain/utils/types/infrastructure/providers/queue/kafka/KafkaProvider";
+import { KafkaProvider } from "../../../infrastructure/providers/queue/kafka/KafkaProvider";
 import { Worker } from "worker_threads";
-import { logger } from "../../../domain/utils/utils/logger";
 import { LoanSimulationEntity } from "../../../domain/entities/LoanSimulationEntity";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class LoanSimulationKafkaListener {
   private kafkaProvider: KafkaProvider;
@@ -15,8 +15,8 @@ export class LoanSimulationKafkaListener {
   }
 
   async startListening(): Promise<void> {
-    await this.kafkaProvider.consumeMessages(
-      "loan-simulations",
+    await this.kafkaProvider.consumeMultipleMessages(
+      ["loan-simulations"],
       "loan-simulation-group",
       async (message) => {
         try {

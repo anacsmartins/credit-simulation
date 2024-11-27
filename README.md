@@ -118,39 +118,102 @@ Este arquivo contém a lógica que cada thread executa.
 
 ```typescript
 
-  import { workerData, parentPort } from 'worker_threads';
-  import { SimulateLoan } from '../../domain/use-cases/SimulateLoan';
-  
-  if (!workerData || !parentPort) {
-    throw new Error('Worker must be initialized with data and port.');
+  // Função para adicionar timeout às promessas
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Timeout exceeded")), timeoutMs)
+  );
+  return Promise.race([promise, timeout]);
+}
+
+// Processa a simulação de empréstimo
+parentPort?.on("message", async (entity: LoanSimulationEntity) => {
+  try {
+    const { loanAmount, birthDate, termMonths, interestType } = entity;
+
+    // Validação inicial
+    if (!loanAmount || !birthDate || !termMonths || !interestType) {
+      throw new Error("Invalid payload format received by Worker");
+    }
+
+    // Simulação com timeout de 5 segundos
+    const simulate: LoanSimulationResult = await withTimeout(
+      loanSimulationService.simulateLoan(
+        loanAmount,
+        birthDate,
+        termMonths,
+        interestType
+      ),
+      5000
+    );
+
+    // Retorno de sucesso
+    const response: LoanSimulationResponse = {
+      success: true,
+      result: simulate,
+    };
+    parentPort?.postMessage(response);
+  } catch (error) {
+    // Log de erro e retorno de falha
+    logger.error("Simulation error", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+
+    const response: LoanSimulationResponse = {
+      success: false,
+      error: errorMessage,
+    };
+    parentPort?.postMessage(response);
   }
-  
-  const simulateLoan = new SimulateLoan();
-  const results = workerData.map((simulation: any) => simulateLoan.execute(simulation));
-  
-  parentPort.postMessage(results);
+});
 ```
-Controle no Endpoint:
+Controle no linstener:
 
 ```typescript
 
-  import { Worker } from 'worker_threads';
-  
-  export async function bulkSimulate(req: Request, res: Response) {
-    const simulations = req.body;
-  
-    const worker = new Worker('./src/infrastructure/workers/simulateWorker.ts', {
-      workerData: simulations,
-    });
-  
-    worker.on('message', (results) => {
-      res.status(200).json(results);
-    });
-  
-    worker.on('error', (error) => {
-      res.status(500).json({ error: error.message });
-    });
-  }
+  // Cria um Worker para processar a simulação
+  (...)
+        const worker = new Worker("./src/infrastructure/workers/simulateWorker.ts", {
+          execArgv: ["-r", "ts-node/register"],
+        });
+
+        // Timeout para monitorar o tempo de resposta do Worker
+        const workerTimeout = setTimeout(() => {
+          worker.terminate();
+          logger.error("Worker timed out");
+        }, 6000); // Timeout de 6 segundos
+
+        worker.on("message", (result) => {
+          clearTimeout(workerTimeout);
+
+          if (result.success) {
+            logger.info("Processed loan simulation:", result.result);
+          } else {
+            logger.error("Error processing loan simulation:", result.error);
+          }
+
+          worker.terminate(); // Terminando o Worker
+        });
+
+        worker.on("error", (error) => {
+          clearTimeout(workerTimeout);
+          logger.error("Worker encountered an error:", error);
+          worker.terminate();
+        });
+
+        worker.on("exit", (code) => {
+          clearTimeout(workerTimeout);
+          if (code !== 0) {
+            logger.error(`Worker stopped with exit code ${code}`);
+          }
+        });
+
+        // Enviando a mensagem para o Worker
+        worker.postMessage(loanSimulationEntity);
+      } catch (error) {
+        logger.error("Failed to process Kafka message:", error);
+      }
 ```
 ## Documentação dos Endpoints
 A documentação foi feita utilizando API Blueprint e está no diretório docs/api-blueprint.apib.
