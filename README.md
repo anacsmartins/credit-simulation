@@ -28,12 +28,19 @@ credit-simulation/
 │   ├── infrastructure/                                  # Configurações, servidores e conectores
 │   │   ├── config/                                      # Configurações de ambiente
 │   │   │   └── routers.ts                               # Configuração de rotas
-│   │   ├── kafka/                                       # Serviços Kafka (produtores e consumidores)
-│   │   │   └── KafkaProvider.ts                         # Cliente Kafka
-│   │   ├── workers/                                     # Threads para processamento paralelo
-│   │   │   └── loanSimulateWorker.js
-│   │   ├── logger/                                      # Configuração de logs
-│   │   │   └── logger.ts
+│   │   ├── providers/
+│   │   │   ├── queue/                                   # Serviços Kafka (produtores e consumidores)
+│   │   │   │   └── KafkaProvider.ts                     # Cliente Kafka
+│   │   │   ├── workers/                                 # Threads para processamento paralelo
+│   │   │   │   └── loanSimulateWorker.js
+│   │   │   ├── inversify/
+|   |   |   |   ├── config.ts        
+│   │   │   │   └── types.ts
+│   │   │   └── email/                                  # Configuração de envio de email
+│   │   │       └── sendgridProvider.ts
+│   │   ├── utils/
+│   │   │   └── logger/                                  # Configuração de logs
+│   │   │       └── logger.ts
 │   │   └── server.ts                                    # Configuração do servidor
 │   └── index.ts                                         # Ponto de entrada
 ├── tests/                                               # Testes unitários, integração e performance
@@ -117,113 +124,107 @@ Arquivo: src/infrastructure/workers/simulateWorker.ts
 Este arquivo contém a lógica que cada thread executa.
 
 ```typescript
+    // Processa a simulação de empréstimo
+    parentPort?.on("message", async (entity: LoanSimulationEntity) => {
+      try {
+        const { loanAmount, birthDate, termMonths, interestType } = entity;
 
-  // Função para adicionar timeout às promessas
-function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Timeout exceeded")), timeoutMs)
-  );
-  return Promise.race([promise, timeout]);
-}
+        // Validação inicial
+        if (!loanAmount || !birthDate || !termMonths || !interestType) {
+          throw new Error("Invalid payload format received by Worker");
+        }
 
-// Processa a simulação de empréstimo
-parentPort?.on("message", async (entity: LoanSimulationEntity) => {
-  try {
-    const { loanAmount, birthDate, termMonths, interestType } = entity;
+        // Simulação com timeout de 5 segundos
+        const simulate: LoanSimulationResult = await withTimeout(
+          loanSimulationService.simulateLoan(
+            loanAmount,
+            birthDate,
+            termMonths,
+            interestType
+          ),
+          5000
+        );
 
-    // Validação inicial
-    if (!loanAmount || !birthDate || !termMonths || !interestType) {
-      throw new Error("Invalid payload format received by Worker");
-    }
+        // Retorno de sucesso
+        const response: LoanSimulationResponse = {
+          success: true,
+          result: simulate,
+        };
+        parentPort?.postMessage(response);
+      } catch (error) {
+        // Log de erro e retorno de falha
+        logger.error("Simulation error", error);
 
-    // Simulação com timeout de 5 segundos
-    const simulate: LoanSimulationResult = await withTimeout(
-      loanSimulationService.simulateLoan(
-        loanAmount,
-        birthDate,
-        termMonths,
-        interestType
-      ),
-      5000
-    );
+        const errorMessage =
+          error instanceof Error ? error.message : "An unknown error occurred";
 
-    // Retorno de sucesso
-    const response: LoanSimulationResponse = {
-      success: true,
-      result: simulate,
-    };
-    parentPort?.postMessage(response);
-  } catch (error) {
-    // Log de erro e retorno de falha
-    logger.error("Simulation error", error);
-
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred";
-
-    const response: LoanSimulationResponse = {
-      success: false,
-      error: errorMessage,
-    };
-    parentPort?.postMessage(response);
-  }
-});
+        const response: LoanSimulationResponse = {
+          success: false,
+          error: errorMessage,
+        };
+        parentPort?.postMessage(response);
+      }
+    });
 ```
 Controle no linstener:
 
 ```typescript
 
-  // Cria um Worker para processar a simulação
-  (...)
-        const worker = new Worker("./src/infrastructure/workers/simulateWorker.ts", {
-          execArgv: ["-r", "ts-node/register"],
-        });
+    // Cria um Worker para processar a simulação
+    const worker = new Worker("./src/infrastructure/workers/simulateWorker.ts", {
+      execArgv: ["-r", "ts-node/register"],
+    });
 
-        // Timeout para monitorar o tempo de resposta do Worker
-        const workerTimeout = setTimeout(() => {
-          worker.terminate();
-          logger.error("Worker timed out");
-        }, 6000); // Timeout de 6 segundos
+    worker.on("message", (result) => {
+      clearTimeout(workerTimeout);
 
-        worker.on("message", (result) => {
-          clearTimeout(workerTimeout);
-
-          if (result.success) {
-            logger.info("Processed loan simulation:", result.result);
-          } else {
-            logger.error("Error processing loan simulation:", result.error);
-          }
-
-          worker.terminate(); // Terminando o Worker
-        });
-
-        worker.on("error", (error) => {
-          clearTimeout(workerTimeout);
-          logger.error("Worker encountered an error:", error);
-          worker.terminate();
-        });
-
-        worker.on("exit", (code) => {
-          clearTimeout(workerTimeout);
-          if (code !== 0) {
-            logger.error(`Worker stopped with exit code ${code}`);
-          }
-        });
-
-        // Enviando a mensagem para o Worker
-        worker.postMessage(loanSimulationEntity);
-      } catch (error) {
-        logger.error("Failed to process Kafka message:", error);
+      if (result.success) {
+        logger.info("Processed loan simulation:", result.result);
+      } else {
+        logger.error("Error processing loan simulation:", result.error);
       }
+
+      worker.terminate(); // Terminando o Worker
+    });
+
+    worker.on("error", (error) => {
+      clearTimeout(workerTimeout);
+      logger.error("Worker encountered an error:", error);
+      worker.terminate();
+    });
+
+    worker.on("exit", (code) => {
+      clearTimeout(workerTimeout);
+      if (code !== 0) {
+        logger.error(`Worker stopped with exit code ${code}`);
+      }
+    });
+
+    // Enviando a mensagem para o Worker
+    worker.postMessage(loanSimulationEntity);
 ```
 ## Documentação dos Endpoints
 A documentação foi feita utilizando API Blueprint e está no diretório docs/api-blueprint.apib.
 
 Exemplo de visualização de endpoints:
 
-### Endpoint 2
+### Endpoint 1
 ```bash
-/simulate-loan: //Simulação de empréstimo individual.
+  //Simulação de empréstimo individual.
+  curl --location --request POST 'http://localhost:3000/simulate-loan' \
+  --header 'Content-Type: application/json' \
+  --data-raw '
 
+  {
+      "loanAmount": 100000,
+      "birthDate": "1970-01-01",
+      "repaymentTermMonths": 12,
+      "email": "teste@teste.com",
+      "currency": "BRL",
+      "interestType": "variable"
+  }  
+
+  '
 ```
 payload
 
@@ -249,7 +250,32 @@ Resonse
 ### Endpoint 2
 
 ```bash
-/simulate-loans: //Processamento de múltiplas simulações.
+//Processamento de múltiplas simulações.
+curl --location --request POST 'http://localhost:3000/simulate-loans' \
+  --header 'Content-Type: application/json' \
+  --data-raw '
+      [
+          {
+              "loanAmount": 2500,
+              "birthDate": "1993-01-01",
+              "repaymentTermMonths": 12,
+              "id": 2
+          },
+          {
+              "loanAmount": 2500,
+              "birthDate": "2000-01-01",
+              "repaymentTermMonths": 12,
+              "id": 3
+          },
+          {
+              "loanAmount": 1000,
+              "birthDate": "1970-01-01",
+              "repaymentTermMonths": 12,
+              "id": 1
+          }
+      ]
+
+  '
 ```
 payload
 
@@ -408,7 +434,7 @@ Execute:
   artillery run src/tests/performance/performance.yaml
 ```
 > [!IMPORTANT]
-> Abaixo descrevo o roteiro usado para implementação do projeto referente ao teste prático de engenharia backend que foi proposto.
+> Abaixo descrevo o roteiro usado para implementação do projeto.
            
 #### Simulador de Crédito
 - [x] Código submetido em um repositório Git público
