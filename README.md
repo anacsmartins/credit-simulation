@@ -109,92 +109,6 @@ docker build -t credit-simulation .
 docker-compose up
 ```
 
-## Processamento em Alta Volumetria com worker_threads
-O endpoint de simulações em massa (/loan/bulk-simulate) utiliza o módulo worker_threads do Node.js para dividir as tarefas de simulação em várias threads, otimizando a performance.
-
-Arquivo: src/infrastructure/workers/simulateWorker.ts
-Este arquivo contém a lógica que cada thread executa.
-
-```typescript
-    // Processa a simulação de empréstimo
-    parentPort?.on("message", async (entity: LoanSimulationEntity) => {
-      try {
-        const { loanAmount, birthDate, termMonths, interestType } = entity;
-
-        // Validação inicial
-        if (!loanAmount || !birthDate || !termMonths || !interestType) {
-          throw new Error("Invalid payload format received by Worker");
-        }
-
-        // Simulação com timeout de 5 segundos
-        const simulate: LoanSimulationResult = await withTimeout(
-          loanSimulationService.simulateLoan(
-            loanAmount,
-            birthDate,
-            termMonths,
-            interestType
-          ),
-          5000
-        );
-
-        // Retorno de sucesso
-        const response: LoanSimulationResponse = {
-          success: true,
-          result: simulate,
-        };
-        parentPort?.postMessage(response);
-      } catch (error) {
-        // Log de erro e retorno de falha
-        logger.error("Simulation error", error);
-
-        const errorMessage =
-          error instanceof Error ? error.message : "An unknown error occurred";
-
-        const response: LoanSimulationResponse = {
-          success: false,
-          error: errorMessage,
-        };
-        parentPort?.postMessage(response);
-      }
-    });
-```
-Controle no linstener:
-
-```typescript
-
-    // Cria um Worker para processar a simulação
-    const worker = new Worker("./src/infrastructure/workers/simulateWorker.ts", {
-      execArgv: ["-r", "ts-node/register"],
-    });
-
-    worker.on("message", (result) => {
-      clearTimeout(workerTimeout);
-
-      if (result.success) {
-        logger.info("Processed loan simulation:", result.result);
-      } else {
-        logger.error("Error processing loan simulation:", result.error);
-      }
-
-      worker.terminate(); // Terminando o Worker
-    });
-
-    worker.on("error", (error) => {
-      clearTimeout(workerTimeout);
-      logger.error("Worker encountered an error:", error);
-      worker.terminate();
-    });
-
-    worker.on("exit", (code) => {
-      clearTimeout(workerTimeout);
-      if (code !== 0) {
-        logger.error(`Worker stopped with exit code ${code}`);
-      }
-    });
-
-    // Enviando a mensagem para o Worker
-    worker.postMessage(loanSimulationEntity);
-```
 ## Documentação dos Endpoints
 A documentação foi feita utilizando API Blueprint e está no diretório docs/api-blueprint.apib.
 
@@ -330,6 +244,93 @@ Resonse
         "id": 1
     }
 ]
+```
+
+## Processamento em Alta Volumetria com worker_threads
+O endpoint de simulações em massa (/loan/bulk-simulate) utiliza o módulo worker_threads do Node.js para dividir as tarefas de simulação em várias threads, otimizando a performance.
+
+Arquivo: src/infrastructure/workers/simulateWorker.ts
+Este arquivo contém a lógica que cada thread executa.
+
+```typescript
+    // Processa a simulação de empréstimo
+    parentPort?.on("message", async (entity: LoanSimulationEntity) => {
+      try {
+        const { loanAmount, birthDate, termMonths, interestType } = entity;
+
+        // Validação inicial
+        if (!loanAmount || !birthDate || !termMonths || !interestType) {
+          throw new Error("Invalid payload format received by Worker");
+        }
+
+        // Simulação com timeout de 5 segundos
+        const simulate: LoanSimulationResult = await withTimeout(
+          loanSimulationService.simulateLoan(
+            loanAmount,
+            birthDate,
+            termMonths,
+            interestType
+          ),
+          5000
+        );
+
+        // Retorno de sucesso
+        const response: LoanSimulationResponse = {
+          success: true,
+          result: simulate,
+        };
+        parentPort?.postMessage(response);
+      } catch (error) {
+        // Log de erro e retorno de falha
+        logger.error("Simulation error", error);
+
+        const errorMessage =
+          error instanceof Error ? error.message : "An unknown error occurred";
+
+        const response: LoanSimulationResponse = {
+          success: false,
+          error: errorMessage,
+        };
+        parentPort?.postMessage(response);
+      }
+    });
+```
+Controle no linstener:
+
+```typescript
+
+    // Cria um Worker para processar a simulação
+    const worker = new Worker("./src/infrastructure/workers/simulateWorker.ts", {
+      execArgv: ["-r", "ts-node/register"],
+    });
+
+    worker.on("message", (result) => {
+      clearTimeout(workerTimeout);
+
+      if (result.success) {
+        logger.info("Processed loan simulation:", result.result);
+      } else {
+        logger.error("Error processing loan simulation:", result.error);
+      }
+
+      worker.terminate(); // Terminando o Worker
+    });
+
+    worker.on("error", (error) => {
+      clearTimeout(workerTimeout);
+      logger.error("Worker encountered an error:", error);
+      worker.terminate();
+    });
+
+    worker.on("exit", (code) => {
+      clearTimeout(workerTimeout);
+      if (code !== 0) {
+        logger.error(`Worker stopped with exit code ${code}`);
+      }
+    });
+
+    // Enviando a mensagem para o Worker
+    worker.postMessage(loanSimulationEntity);
 ```
 
 ## Integração Kafka (Abstraída)
