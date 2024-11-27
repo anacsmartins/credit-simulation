@@ -25,6 +25,11 @@ const validateCurrency: ValidationChain = body("currency")
   .isIn(["BRL", "USD", "EUR", "GBP"])
   .withMessage("Currency must be one of the following: BRL, USD, EUR, GBP.");
 
+const validateEmail: ValidationChain = body("email")
+  .optional()
+  .isEmail()
+  .withMessage("Please provide a valid email address.");
+
 // Exportar os middlewares de validação
 export const loanSimulationValidation: ValidationChain[] = [
   validateLoanAmount,
@@ -32,6 +37,7 @@ export const loanSimulationValidation: ValidationChain[] = [
   validateRepaymentTerm,
   validateInterestType,
   validateCurrency,
+  validateEmail
 ];
 
 // Exportar o middleware de tratamento de erros separadamente

@@ -1,11 +1,14 @@
-import { Request, Response } from "express";
-import { LoanSimulationService } from "../../../domain/types/LoanSimulationService";
-import { LoanSimulationRequest } from "../interfaces/LoanSimulationContracts";
+import { inject } from 'inversify';
+import { Request, Response } from 'express';
+import { LoanSimulationRequest } from '../interfaces/LoanSimulationContracts';
+import { LoanSimulationService } from '../../../domain/services/LoanSimulationService';
+import { TYPES } from '../../../infrastructure/providers/inversify/types';
 
 export class LoanSimulationController {
   private readonly service: LoanSimulationService;
 
-  constructor(service: LoanSimulationService) {
+  // Injeção de dependência via container
+  constructor(@inject(TYPES.LoanSimulationService) service: LoanSimulationService) {
     this.service = service;
     this.simulate = this.simulate.bind(this);
     this.simulateBatch = this.simulateBatch.bind(this);    

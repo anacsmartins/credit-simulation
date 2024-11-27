@@ -1,17 +1,10 @@
+import { injectable } from 'inversify';
 import sgMail from '@sendgrid/mail';
 
+@injectable()
 export class SendgridProvider {
-  private static instance: SendgridProvider;
-
-  private constructor() {
+  constructor() {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
-  }
-
-  public static getInstance(): SendgridProvider {
-    if (!SendgridProvider.instance) {
-      SendgridProvider.instance = new SendgridProvider();
-    }
-    return SendgridProvider.instance;
   }
 
   public async sendEmail(to: string, subject: string, text: string): Promise<void> {

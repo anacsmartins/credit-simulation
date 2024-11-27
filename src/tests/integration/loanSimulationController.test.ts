@@ -1,6 +1,6 @@
-import { LoanSimulationService } from "../../domain/types/LoanSimulationService";
-import { LoanSimulationController } from "../../application/loan/controllers/LoanController";
-import { Server } from "../../domain/types/infrastructure/server";
+import { LoanSimulationService } from "../../domain/services/LoanSimulationService";
+import { LoanSimulationController } from "../../application/loan/controllers/LoanSimulationController";
+import { Server } from "../../infrastructure/server";
 import request from "supertest";
 
 // Mockando a classe LoanSimulationService corretamente

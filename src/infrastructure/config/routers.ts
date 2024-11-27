@@ -1,16 +1,17 @@
 import express from "express";
-import { LoanSimulationService } from "../../domain/types/LoanSimulationService";
-import { SendgridProvider } from "../../infrastructure/providers/email/SendgridProvider";
+import { LoanSimulationController } from "../../application/loan/controllers/LoanSimulationController";
 import { handleValidationErrors } from "../../application/middlewares/handlerValidationErrors";
 import { loanSimulationValidation } from "../../application/middlewares/loanSimulationValidation";
-import { LoanSimulationController } from "../../application/loan/controllers/LoanController";
 import { globalErrorHandler } from "../../application/middlewares/globalErrorsHandler";
+import { inversifyContainer } from "../providers/inversify/config";
+import { TYPES } from "../providers/inversify/types";
 
 const router = express.Router();
-const sendgridProvider = SendgridProvider.getInstance(); // Criando instância do SendgridProvider
-const loanSimulationService = new LoanSimulationService(sendgridProvider); // Injetando SendgridProvider
-const loanSimulationController = new LoanSimulationController(loanSimulationService);
 
+// Obtendo o controlador do contêiner (inversify)
+const loanSimulationController = inversifyContainer.get<LoanSimulationController>(TYPES.LoanSimulationController);
+
+// Definindo as rotas
 router.post(
   "/simulate-loan",
   [...loanSimulationValidation, handleValidationErrors],

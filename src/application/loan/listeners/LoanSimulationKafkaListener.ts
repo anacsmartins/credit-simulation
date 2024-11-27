@@ -1,6 +1,6 @@
-import { KafkaProvider } from "../../../domain/types/infrastructure/providers/queue/kafka/KafkaProvider";
+import { KafkaProvider } from "../../../domain/utils/types/infrastructure/providers/queue/kafka/KafkaProvider";
 import { Worker } from "worker_threads";
-import { logger } from "../../../domain/types/infrastructure/config/utils/logger";
+import { logger } from "../../../domain/utils/utils/logger";
 import { LoanSimulationEntity } from "../../../domain/entities/LoanSimulationEntity";
 
 export class LoanSimulationKafkaListener {

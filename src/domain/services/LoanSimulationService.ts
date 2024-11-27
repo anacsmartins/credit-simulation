@@ -1,7 +1,12 @@
-import { SendgridProvider } from "./infrastructure/providers/email/SendgridProvider";
+
+import { SendgridProvider } from "../../infrastructure/providers/email/SendgridProvider";
+import { TYPES } from "../../infrastructure/providers/inversify/types";
 import { LoanSimulationEntity } from "../entities/LoanSimulationEntity";
 import { LoanSimulationResult } from "../interfaces/LoanSimulationResult";
 import { Interest } from "../interfaces/types";
+import { injectable, inject } from 'inversify';
+import { EmailValidator } from "../utils/validators/emailValidate";
+
 
 const MONTHS = 12;
 
@@ -13,11 +18,12 @@ const exchangeRates: Record<string, number> = {
   BRL: 1.0,  // 1 BRL = 1 BRL
 };
 
+@injectable()
 export class LoanSimulationService {
   private sendgridProvider: SendgridProvider;
 
-  constructor(sendgridProvider: SendgridProvider) {
-    this.sendgridProvider = sendgridProvider; // Injeção de dependência
+  constructor(@inject(TYPES.SendgridProvider) sendgridProvider: SendgridProvider) {
+    this.sendgridProvider = sendgridProvider;
   }
 
   // Função para converter o valor do empréstimo para BRL (moeda padrão)
@@ -79,21 +85,19 @@ export class LoanSimulationService {
     return baseRate + adjustmentFactor * (loanSimulation.termMonths / MONTHS);
   }
 
-  public async sendEmail(simulationResult: LoanSimulationResult, email: string): Promise<void> {
-    // Validação do e-mail
-    if (!EmailValidator.isValid(email)) {
-        throw new Error("Invalid email address");
+  public async sendEmail(simulationResult: LoanSimulationResult, email?: string) {
+    // Verificando se o e-mail é válido
+    if (email && !EmailValidator.isValid(email)) {
+      throw new Error("E-mail inválido.");
     }
-
+  
+    // Preparando a mensagem para envio
     const emailText = `Aqui estão os resultados da sua simulação de empréstimo:\n\n` +
-      `Parcela Mensal: ${simulationResult.monthlyInstallment}\n` +
-      `Total a Pagar: ${simulationResult.totalAmount}\n` +
-      `Total de Juros: ${simulationResult.totalInterest}`;
-    
-    try {
-        await this.sendgridProvider.sendEmail(email, 'Resultado da Simulação de Empréstimo', emailText);
-    } catch (error) {
-        throw new Error("Failed to send email");
-    }
+    `Parcela Mensal: ${simulationResult.monthlyInstallment}\n` +
+    `Total a Pagar: ${simulationResult.totalAmount}\n` +
+    `Total de Juros: ${simulationResult.totalInterest}`;
+  
+    // Enviando o e-mail com os resultados da simulação
+    await this.sendgridProvider.sendEmail(email!, 'Resultado da Simulação de Empréstimo', emailText);
   }
 }
