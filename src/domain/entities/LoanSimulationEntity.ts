@@ -1,5 +1,5 @@
 import { check } from 'express-validator';
-import { Interest } from '../types/types';
+import { Interest } from '../interfaces/types';
 
 export class LoanSimulationEntity {
   loanAmount: number;

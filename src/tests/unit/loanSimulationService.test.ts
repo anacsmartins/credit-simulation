@@ -1,7 +1,7 @@
 import { LoanSimulationEntity } from "../../domain/entities/LoanSimulationEntity";
 import { LoanSimulationResult } from "../../domain/interfaces/LoanSimulationResult";
-import { LoanSimulationService } from "../../domain/services/LoanSimulationService";
-import { Interest } from "../../domain/types/types";
+import { LoanSimulationService } from "../../domain/types/LoanSimulationService";
+import { Interest } from "../../domain/interfaces/types";
 
 
 // Mock do constructor e da função `validate` da entidade LoanSimulationEntity

@@ -1,10 +1,10 @@
 import express from "express";
-import { LoanSimulationService } from "../../domain/types/LoanSimulationService";
-import { SendgridProvider } from "../../infrastructure/providers/email/SendgridProvider";
-import { handleValidationErrors } from "../../application/middlewares/handlerValidationErrors";
-import { loanSimulationValidation } from "../../application/middlewares/loanSimulationValidation";
-import { LoanSimulationController } from "../../application/loan/controllers/LoanController";
-import { globalErrorHandler } from "../../application/middlewares/globalErrorsHandler";
+import { LoanSimulationService } from "../../LoanSimulationService";
+import { SendgridProvider } from "../providers/email/SendgridProvider";
+import { handleValidationErrors } from "../../../../application/middlewares/handlerValidationErrors";
+import { loanSimulationValidation } from "../../../../application/middlewares/loanSimulationValidation";
+import { LoanSimulationController } from "../../../../application/loan/controllers/LoanController";
+import { globalErrorHandler } from "../../../../application/middlewares/globalErrorsHandler";
 
 const router = express.Router();
 const sendgridProvider = SendgridProvider.getInstance(); // Criando instância do SendgridProvider

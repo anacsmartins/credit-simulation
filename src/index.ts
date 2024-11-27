@@ -1,4 +1,4 @@
-import { Server } from "./infrastructure/server";
+import { Server } from "./domain/types/infrastructure/server";
 
 const PORT = 3000;
 

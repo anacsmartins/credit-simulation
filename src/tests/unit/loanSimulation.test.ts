@@ -1,7 +1,7 @@
 
 import { validationResult } from 'express-validator';
 import { LoanSimulationEntity } from '../../domain/entities/LoanSimulationEntity';
-import { Interest } from '../../domain/types/types';
+import { Interest } from '../../domain/interfaces/types';
 
 describe('LoanSimulationEntity', () => {
   describe('Constructor', () => {

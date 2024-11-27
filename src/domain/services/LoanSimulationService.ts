@@ -1,6 +1,7 @@
+import { SendgridProvider } from "./infrastructure/providers/email/SendgridProvider";
 import { LoanSimulationEntity } from "../entities/LoanSimulationEntity";
 import { LoanSimulationResult } from "../interfaces/LoanSimulationResult";
-import { Interest } from "../types/types";
+import { Interest } from "../interfaces/types";
 
 const MONTHS = 12;
 
@@ -12,17 +13,11 @@ const exchangeRates: Record<string, number> = {
   BRL: 1.0,  // 1 BRL = 1 BRL
 };
 
-
 export class LoanSimulationService {
-  private static instance: LoanSimulationService;
+  private sendgridProvider: SendgridProvider;
 
-  private constructor() {}
-
-  public static getInstance(): LoanSimulationService {
-    if (!LoanSimulationService.instance) {
-      LoanSimulationService.instance = new LoanSimulationService();
-    }
-    return LoanSimulationService.instance;
+  constructor(sendgridProvider: SendgridProvider) {
+    this.sendgridProvider = sendgridProvider; // Injeção de dependência
   }
 
   // Função para converter o valor do empréstimo para BRL (moeda padrão)
@@ -82,5 +77,23 @@ export class LoanSimulationService {
 
     const adjustmentFactor = 0.01;
     return baseRate + adjustmentFactor * (loanSimulation.termMonths / MONTHS);
+  }
+
+  public async sendEmail(simulationResult: LoanSimulationResult, email: string): Promise<void> {
+    // Validação do e-mail
+    if (!EmailValidator.isValid(email)) {
+        throw new Error("Invalid email address");
+    }
+
+    const emailText = `Aqui estão os resultados da sua simulação de empréstimo:\n\n` +
+      `Parcela Mensal: ${simulationResult.monthlyInstallment}\n` +
+      `Total a Pagar: ${simulationResult.totalAmount}\n` +
+      `Total de Juros: ${simulationResult.totalInterest}`;
+    
+    try {
+        await this.sendgridProvider.sendEmail(email, 'Resultado da Simulação de Empréstimo', emailText);
+    } catch (error) {
+        throw new Error("Failed to send email");
+    }
   }
 }
