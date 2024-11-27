@@ -198,6 +198,20 @@ Controle no linstener:
 ## Documentação dos Endpoints
 A documentação foi feita utilizando API Blueprint e está no diretório docs/api-blueprint.apib.
 
+Para gerar uma visualização legível, utilize **Aglio**:
+obs: certifique que a aplicação esta em execução. 
+
+```bash
+aglio -i src/docs/api.apib - theme-template triple -s
+```
+Agurade o seguinte retorno no console:
+
+```bash
+Rendering src/docs/api.apib
+Refresh web page in browser
+```
+Após exibição acesse http://127.0.0.1:3000/
+
 Exemplo de visualização de endpoints:
 
 ### Endpoint 1
@@ -317,20 +331,6 @@ Resonse
     }
 ]
 ```
-
-Para gerar uma visualização legível, utilize **Aglio**:
-obs: certifique que a aplicação esta em execução. 
-
-```bash
-aglio -i src/docs/api.apib - theme-template triple -s
-```
-Agurade o seguinte retorno no console:
-
-```bash
-Rendering src/docs/api.apib
-Refresh web page in browser
-```
-Após exibição acesse http://127.0.0.1:3000/
 
 ## Integração Kafka (Abstraída)
 O código prevê integração futura com Kafka para filas de simulações. Mensagens podem ser enviadas para um tópico e processadas por workers.
