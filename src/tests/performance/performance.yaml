@@ -1,0 +1,14 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60  # A duração do teste em segundos
+      arrivalRate: 200  # Taxa de chegada de requisições por segundo (200 requisições por segundo)
+
+scenarios:
+  - flow:
+      - post:
+          url: "/simulate-loan"  # A URL da API que você deseja testar
+          json:
+            - loanAmount: 10000
+              birthDate: "1980-01-01"
+              repaymentTermMonths: 24

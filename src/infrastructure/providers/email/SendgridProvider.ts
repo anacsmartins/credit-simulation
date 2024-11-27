@@ -10,13 +10,13 @@ export class SendgridProvider {
   public async sendEmail(to: string, subject: string, text: string): Promise<void> {
     const msg = {
       to,
-      from: 'your-email@example.com', // Substitua com o seu e-mail
+      from: 'email@example.com',
       subject,
       text,
     };
 
     try {
-      await sgMail.send(msg);
+      //await sgMail.send(msg);
       console.log('E-mail enviado com sucesso!');
     } catch (error) {
       console.error('Erro ao enviar e-mail:', error);

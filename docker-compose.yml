@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  credit-simulation:
+    build: .
+    container_name: credit-simulation
+    ports:
+      - "3000:3000"  # Expondo a porta 3000 do container para a máquina local
+    environment:
+      - NODE_ENV=production
+    networks:
+      - credit-simulation-network
+
+networks:
+  credit-simulation-network:
+    driver: bridge

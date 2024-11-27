@@ -157,10 +157,87 @@ A documentação foi feita utilizando API Blueprint e está no diretório docs/a
 
 Exemplo de visualização de endpoints:
 
-/loan/simulate: Simulação de empréstimo individual.
-/loan/bulk-simulate: Processamento de múltiplas simulações.
+### Endpoint 2
+```bash
+/simulate-loan: //Simulação de empréstimo individual.
 
-Para gerar uma visualização legível, utilize Aglio:
+```
+payload
+
+```json
+  {
+    "loanAmount": 100000,
+    "birthDate": "1970-01-01",
+    "repaymentTermMonths": 12,
+    "email": "teste@teste.com",
+    "currency": "BRL",
+    "interestType": "variable"
+  }
+```
+Resonse
+
+```json
+  {
+    "monthlyInstallment": 8469.37,
+    "totalAmount": 101632.44,
+    "totalInterest": 1632.44
+  }
+```
+### Endpoint 2
+
+```bash
+/simulate-loans: //Processamento de múltiplas simulações.
+```
+payload
+
+```json  
+    [
+        {
+            "loanAmount": 2500,
+            "birthDate": "1993-01-01",
+            "repaymentTermMonths": 12,
+            "id": 2
+        },
+        {
+            "loanAmount": 2500,
+            "birthDate": "2000-01-01",
+            "repaymentTermMonths": 12,
+            "id": 3
+        },
+        {
+            "loanAmount": 1000,
+            "birthDate": "1970-01-01",
+            "repaymentTermMonths": 12,
+            "id": 1
+        }
+    ]
+```
+Resonse
+
+```json
+  [
+    {
+        "monthlyInstallment": 212.87,
+        "totalAmount": 2554.5,
+        "totalInterest": 54.5,
+        "id": 2
+    },
+    {
+        "monthlyInstallment": 215.17,
+        "totalAmount": 2581.99,
+        "totalInterest": 81.99,
+        "id": 3
+    },
+    {
+        "monthlyInstallment": 84.69,
+        "totalAmount": 1016.32,
+        "totalInterest": 16.32,
+        "id": 1
+    }
+]
+```
+
+Para gerar uma visualização legível, utilize **Aglio**:
 obs: certifique que a aplicação esta em execução. 
 
 ```bash
@@ -169,7 +246,7 @@ aglio -i src/docs/api.apib - theme-template triple -s
 Agurade o seguinte retorno no console:
 
 ```bash
-Socket connected
+Rendering src/docs/api.apib
 Refresh web page in browser
 ```
 Após exibição acesse http://127.0.0.1:3000/
@@ -180,32 +257,68 @@ Exemplo de integração Kafka:
 
 ```typescript
 
-  import { Kafka } from 'kafkajs';
-  
-  const kafka = new Kafka({ clientId: 'credit-simulation', brokers: ['kafka:9092'] });
-  
-  const producer = kafka.producer();
-  await producer.connect();
-  
-  await producer.send({
-    topic: 'simulation-requests',
-    messages: [{ value: JSON.stringify(simulationData) }],
-  });
+  // Método para enviar mensagens para qualquer tópico
+  async sendMessage(topic: string, messages: any[]): Promise<void> {
+    const producer: Producer = this.kafka.producer();
+    await producer.connect();
+    await producer.send({
+      topic,
+      messages: messages.map((message) => ({ value: JSON.stringify(message) })),
+    });
+    await producer.disconnect();
+  }
+
+  // Método genérico para consumir mensagens de qualquer tópico com callback
+  async consumeMessages(topic: string, groupId: string, handleMessage: (message: any) => Promise<void>): Promise<void> {
+    const consumer: Consumer = this.kafka.consumer({ groupId });
+    await consumer.connect();
+    await consumer.subscribe({ topic, fromBeginning: true });
+
+    await consumer.run({
+      eachMessage: async ({ message }) => {
+        if (message.value) {
+          const data = JSON.parse(message.value.toString());
+          await handleMessage(data);
+        }
+      },
+    });
+  }
+
+  // Método para criar múltiplos consumidores com tópicos diferentes e grupos diferentes
+  async consumeMultipleMessages(topics: string[], groupId: string, handleMessage: (message: any) => Promise<void>): Promise<void> {
+    const consumer: Consumer = this.kafka.consumer({ groupId });
+    await consumer.connect();
+    
+    // Subscrição em múltiplos tópicos
+    for (const topic of topics) {
+      await consumer.subscribe({ topic, fromBeginning: true });
+    }
+
+    await consumer.run({
+      eachMessage: async ({ message }) => {
+        if (message.value) {
+          const data = JSON.parse(message.value.toString());
+          await handleMessage(data);
+        }
+      },
+    });
+  }
 ```
 ## Testes
 ### Testes de Unidade
 Testam a lógica de cálculo de empréstimos:
 
 ```bash
-npm run test:unit
+npm run test
 ```
 ### Testes de Integração
 Verificam os endpoints e a interação entre camadas:
 
 ```bash
 
-npm run test:integration
+npm run test
 ```
+
 ### Testes de Performance
 Simula alta volumetria usando Artillery:
 
@@ -219,19 +332,18 @@ config:
 scenarios:
   - flow:
       - post:
-          url: "/loan/bulk-simulate"
+          url: "/simulate-loan"
           json:
             - loanAmount: 10000
               birthDate: "1980-01-01"
-              termMonths: 24
+              repaymentTermMonths: 24
 ```
 Execute:
 
 ```bash
 
-artillery run tests/performance.yaml
+  artillery run src/tests/performance/performance.yaml
 ```
-
 > [!IMPORTANT]
 > Abaixo descrevo o roteiro usado para implementação do projeto referente ao teste prático de engenharia backend que foi proposto.
            
@@ -241,7 +353,6 @@ artillery run tests/performance.yaml
 #### Setup do Projeto
 - [x] Utilização da linguagem de programação backend: typeScript
 - [x] Framework : express
-
 - [x] Crie endpoints para simular um empréstimo
 - [x] O resultado da simulação deve incluir: valor total a ser pago, ○ Valor das parcelas mensais, ○ Total de juros pagos.
 - [x] Cálculos de Simulação
