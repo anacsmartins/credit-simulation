@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
+    "target": "ES2020",
     "strict": true,
     "module": "CommonJS",
     "rootDir": "./src",
     "outDir": "./dist",
     "experimentalDecorators": true,  // Habilitar suporte a decorators
-    "emitDecoratorMetadata": true     // Emitir metadados necessários para bibliotecas como inversify
+    "emitDecoratorMetadata": true,     // Emitir metadados necessários para bibliotecas como inversify   
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src"]
 }

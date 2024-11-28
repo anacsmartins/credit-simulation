@@ -1,10 +1,19 @@
 FROM node:16
 
-WORKDIR /app
+# Define o diretório de trabalho
+WORKDIR /credit-simulation
 
-COPY package*.json ./
+# Copia os arquivos de configuração
+COPY package*.json tsconfig.json ./
+
+# Instala as dependências
 RUN npm install
 
-COPY . .
+# Copia o restante dos arquivos
+COPY . ./
 
-CMD ["node", "src/index.js"]
+# Compila o TypeScript para JavaScript
+RUN npm run build
+
+# Define o ponto de entrada
+CMD ["node", "dist/index.js"]

@@ -4,9 +4,9 @@
   "description": "Este microserviço realiza simulações de crédito com base em informações fornecidas, como valor do empréstimo, data de nascimento do cliente e prazo de pagamento. Ele é construído em **TypeScript**, segue a **arquitetura hexagonal**, utiliza `worker_threads` para processamento em alta volumetria e está preparado para execução em containers **Docker** e gerenciamento por **Kubernetes**.",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
     "lint": "eslint . ",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "jest --watchAll",
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@eslint/js": "^9.15.0",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.9.4",
+    "@types/node": "^22.10.0",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
